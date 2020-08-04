@@ -4,6 +4,7 @@ Table of Contents
 =================
 
    * [C# Advanced Topics](#c-advanced-topics)
+   * [Table of Contents](#table-of-contents)
       * [Generics](#generics)
          * [Different type of constraints](#different-type-of-constraints)
          * [IEnumerable vs ICollection vs IList](#ienumerable-vs-icollection-vs-ilist)
@@ -11,6 +12,11 @@ Table of Contents
             * [ICollection](#icollection)
             * [IList](#ilist)
       * [Delegates](#delegates)
+         * [Action, Func and Predicate](#action-func-and-predicate)
+            * [Action](#action)
+            * [Func](#func)
+            * [Predicate](#predicate)
+         * [Interfaces vs Delegates](#interfaces-vs-delegates)
       * [Lambda Expressions](#lambda-expressions)
       * [Events](#events)
       * [Extension Methods](#extension-methods)
@@ -19,6 +25,10 @@ Table of Contents
       * [Dynamic](#dynamic)
       * [Exception Handling](#exception-handling)
       * [Asynchronous Programming with Async/Await](#asynchronous-programming-with-asyncawait)
+      * [Polymorphism](#polymorphism)
+         * [Method hiding](#method-hiding)
+         * [Method overriding](#method-overriding)
+         * [Method overloading](#method-overloading)
       * [Access Modifiers](#access-modifiers)
       * [yield return](#yield-return)
       * [Value types vs Reference types](#value-types-vs-reference-types)
@@ -105,6 +115,273 @@ ICollection is another type of collection, which derives from IEnumerable and ex
 IList extends ICollection. An IList can perform all operations combined from IEnumerable and ICollection, and some more operations like inserting or removing an element in the middle of a list.
 
 ## Delegates
+Delegate definition:
+* An object that knows how to call a method (or a group of methods)
+* A reference to a function
+
+Delegates makes it possible to design extensible and flexible applications (e.g. frameworks). If we look at the code example below, we create a program for processing photos and adding different filters to the processing. Instead of having a set of filters that are always applied (the code that is commented out), we can use delegates and instead make the user apply the filters that they want when processing a photo. This also allow the users to create and apply their own filters aslong as it meets the delegate's function signature.
+
+> Delegates are very similar to using the Decorator pattern!
+
+```cs
+namespace Delegates {
+    class Photo {
+        public static Photo Load(string path) {
+            return new Photo();
+        }
+
+        public void Save() {}
+    }
+
+    class PhotoFilters {
+        public void ApplyBrightness(Photo photo) { Console.WriteLine("Apply brightness") }
+        public void ApplyContrast(Photo photo) { Console.WriteLine("Apply contrast") }
+        public void Resize(Photo photo) { Console.WriteLine("Resize photo") }
+    }
+
+    class PhotoProcessor {
+        public delegate void PhotoFilterHandler(Photo photo);
+        
+        public void Process(string path, PhotoFilterHandler filterHandler) {
+            var photo = Photo.Load(path);
+
+            filterHandler(photo);
+
+            // BEFORE USING DELEGATES
+            // var filters = new PhotoFilters();
+            // filters.ApplyBrightness(photo);
+            // filters.ApplyContrast(photo);
+            // filters.Resize(photo);
+
+            photo.Save();
+        }
+    }
+
+    class Program {
+        static void Main(string[] args) {
+            var processor = new PhotoProcessor();
+            var filters = new PhotoFilters();
+            PhotoProcessor.PhotoFilterHandler filterHandler = filters.ApplyBrightness;
+            filterHandler += filters.ApplyContrast;
+            filterHandler += RemoveRedEyeFilter;
+
+            processor.Process("photo.jpg", filterHandler);
+        }
+
+        static void RemoveRedEyeFilter(Photo photo) { Console.WriteLine("Apply RemoveRedEye") }
+    }
+}
+```
+
+### Action, Func and Predicate
+Action, Func and Predicate are two predefined delegates that are shipped with the .NET framework.
+
+#### Action
+Action points to a method that accepts one or more arguments and returns void.
+
+The code example below prints "Hello!!!" to the console using the Action delegate.
+
+```cs
+static void Main(string[] args)
+{
+    Action<string> action = new Action<string>(Display);
+    action("Hello!!!");
+    Console.Read();
+}
+
+static void Display(string message)
+{
+    Console.WriteLine(message);
+}
+```
+
+Below is the photo processing example using Actions instead:
+
+```cs
+class PhotoProcessor {
+    public delegate void PhotoFilterHandler(Photo photo);
+    
+    public void Process(string path, Action<Photo> filterHandler) {
+        var photo = Photo.Load(path);
+
+        filterHandler(photo);
+
+        photo.Save();
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        var processor = new PhotoProcessor();
+        var filters = new PhotoFilters();
+        Action<Photo> filterHandler = filters.ApplyBrightness;
+        filterHandler += filters.ApplyContrast;
+        filterHandler += RemoveRedEyeFilter;
+
+        processor.Process("photo.jpg", filterHandler);
+    }
+
+    static void RemoveRedEyeFilter(Photo photo) { Console.WriteLine("Apply RemoveRedEye") }
+}
+```
+
+#### Func
+Func points to a method that accepts one or more arguments and returns a value.
+
+The following code snippet illustrates how you can use a Func delegate in C#. It prints the value of Hra (calculated as 40% of basic salary). The basic salary is passed to it as an argument.
+
+```cs
+static void Main(string[] args)
+{
+    Func<int, double> func = new Func<int, double>(CalculateHra);
+    Console.WriteLine(func(50000));
+    Console.Read();
+}
+
+static double CalculateHra(int basic)
+{
+    return (double)(basic * .4);
+}
+```
+
+> Note that the second parameter in the declaration of the Func delegate in the code snippet represents the return type of the method to which the delegate would point. In this example, the calculated Hra value is returned as double.
+
+
+#### Predicate
+A Predicate delegate is typically used to search items in a collection or a set of data.
+
+The code example below creates a Predicate delegate filter that is used to filter out the persons with Id = 1. The output in this case would be "Jacob".
+
+```cs
+class Customer
+{
+    public int Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+}
+
+class Program {
+    static void Main(string[] args)
+    {
+        List<Customer> custList = new List<Customer>();
+        custList.Add(new Customer { Id = 1, FirstName = "Jacob", LastName = "Hallman" });
+        custList.Add(new Customer { Id = 2, FirstName = "Elon", LastName = "Musk" });
+        Predicate<Customer> firstCustomer = x => x.Id == 1;
+        Customer customer = custList.Find(firstCustomer);
+        Console.WriteLine(customer.FirstName);
+        Console.Read(); 
+    }
+}
+```
+
+> Note that Predicate<T> is basically equivalent to Func<T,bool>.
+
+### Interfaces vs Delegates
+An alternative to delegates is using interfaces, how do we decide which to use?
+
+**Use a delegate when**
+* An eventing design pattern is used.
+* The caller doesn't need to access other properties or methods on the object implementing the method.
+* The interface defines only a single method.
+* Multicast capability is needed (combining filters for instance).
+* The subscriber needs to implement the interface multiple times.
+
+Below are two code examples, one using interfaces and one using delegates:
+
+```cs
+public interface ICustomerFilter 
+{
+    bool Filter (Customer customer); 
+}
+
+public class Util 
+{
+    public static List<Customer> FilterCustomers (List<Customer> allCustomers, ICustomerFilter customerFilter) 
+    {
+        List<Customer> filteredCustomers = new List<Customer>();
+        for(int i = 0; i < allCustomers.Length; i++)
+        {
+            if(customerFilter(allCustomers[i]) filteredCustomers.add(allCustomers[i]);
+        }
+        return filteredCustomers;
+    } 
+}
+
+class CustomersWithFirstAndLastNames: ICustomerFilter 
+{
+    public bool Filter (Customer customer) => String.IsNullOrWhiteSpace(customers?.firstName) && String.IsNullOrWhiteSpace(customers?.lastName) 
+}
+
+class CustomersWhoLikeStarks: ICustomerFilter
+{
+    public bool Filter (Customer customer) => customer?.gameOfThronesHouse == "Starks";
+}
+```
+
+```cs
+public delegate bool ICustomerFilter(Customer customer);
+
+public class Util 
+{
+    public static List<Customer> FilterCustomers (List<Customer> allCustomers, ICustomerFilter customerFilter) 
+    {
+        List<Customer> filteredCustomers = new List<Customer>();
+        for(int i=0; i<allCustomers.Length; i++)
+        {
+            if(customerFilter(allCustomers[i]) filteredCustomers.add(allCustomers[i]);
+        }
+        return filteredCustomers;
+    } 
+}
+
+static bool CustomersWithFirstAndLastNames(Customer customers) => 
+    String.IsNullOrWhiteSpace(customers?.firstName) &&
+    String.IsNullOrWhiteSpace(customers?.lastName);
+
+static bool CustomersWhoLikeStarks(Customer customers) => 
+    customers?.gameOfThronesHouse == "Starks";
+```
+
+Comparing usage:
+
+```cs
+static void Main() 
+{
+    // Interface:
+    List<Customer> customers = new List<Customer>();
+    Util.PopulateCustomers(out customers);
+    var myFilteredCustomers = Util.Filter(customers, new CustomersWithFirstAndLastNames());
+    
+    // Delegates:
+    List<Customer> customers2 = new List<Customer>();
+    Util.PopulateCustomers(out customers2);
+    var myFilteredCustomers = Util.Filter(customers2, CustomersWithFirstAndLastNames);
+}
+```
+
+The difference is subtle, but for this scenario, the delegate enables cleaner design. Technically, a delegate is a little bit overkill for this usecase as we could achieve the above with LINQ, but it does provide a clear comparison against interfaces.
+
+Let’s say that now we needed to combine multiple filters so we would get customers who have CustomersWithFirstAndLastNames and CustomersWhoLikeHouseStark. Here is how we would implement it with an interface and a delegate:
+
+```cs
+static void Main() 
+{
+    // Interface:
+    ...
+    var myFilteredCustomers = Util.Filter(
+          Util.Filter(customers, new CustomersWithFirstAndLastNames()),
+               new CustomersWhoLikeHouseStark())
+          );
+
+    // Delegates:
+    ...
+    ICustomerFilter manyFilters = CustomersWithFirstAndLastNames;
+    manyFilters += CustomersWhoLikeHouseStark;
+    var myFilteredCustomers = Util.Filter(customers2, manyFilters);
+}
+```
+
+For the interface example, it is obvious that we could potentially end up with a heavily nested filter, which is not ideal. We could have instead executed Util.Filter(...) on multiple lines and reassigned the result to the list, but this is not as succinct or flexible as the multicast delegate. Do note, in the delegate example, we could also remove the filter by applying -=.
 
 ## Lambda Expressions
 
