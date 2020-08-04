@@ -301,7 +301,7 @@ public class Util
         List<Customer> filteredCustomers = new List<Customer>();
         for(int i = 0; i < allCustomers.Length; i++)
         {
-            if(customerFilter(allCustomers[i]) filteredCustomers.add(allCustomers[i]);
+            if(customerFilter(allCustomers[i])) filteredCustomers.add(allCustomers[i]);
         }
         return filteredCustomers;
     } 
@@ -328,7 +328,7 @@ public class Util
         List<Customer> filteredCustomers = new List<Customer>();
         for(int i=0; i<allCustomers.Length; i++)
         {
-            if(customerFilter(allCustomers[i]) filteredCustomers.add(allCustomers[i]);
+            if(customerFilter(allCustomers[i])) filteredCustomers.add(allCustomers[i]);
         }
         return filteredCustomers;
     } 
