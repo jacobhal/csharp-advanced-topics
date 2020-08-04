@@ -122,7 +122,155 @@ IList extends ICollection. An IList can perform all operations combined from IEn
 
 ## Asynchronous Programming with Async/Await
 
+## Polymorphism
+Polymorphism is one one of the main aspect of OOPS Principles which include method overriding and method overloading. Virtual and Override keyword are used for method overriding and new keyword is used for method hiding.
 
+Consider the below class hierarchy with classes A, B, and C. A is the super/base class, B is derived from class A and C is derived from class B.
+
+A (super/base class) --> B --> C
+
+> The virtual keyword is used to modify a method, property, indexer, or event declared in the base class and allow it to be overridden in the derived class.
+
+> The override keyword is used to extend or modify a virtual/abstract method, property, indexer, or event of base class into derived class.
+
+> The new keyword is used to hide a method, property, indexer, or event of base class into derived class.
+
+### Method hiding
+For hiding the base class method from derived class simply declare the derived class method with a new keyword.
+
+```cs
+using System;
+namespace Polymorphism
+{
+    class A
+    {
+        public void Test() { Console.WriteLine("A::Test()"); }
+    }
+
+    class B : A
+    {
+        public new void Test() { Console.WriteLine("B::Test()"); }
+    }
+
+    class C : B
+    {
+        public new void Test() { Console.WriteLine("C::Test()"); }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            A a = new A();
+            B b = new B();
+            C c = new C();
+
+            a.Test(); // output --> "A::Test()"
+            b.Test(); // output --> "B::Test()"
+            c.Test(); // output --> "C::Test()"
+
+            a = new B();
+            a.Test(); // output --> "A::Test()"
+
+            b = new C();
+            b.Test(); // output --> "B::Test()"
+
+            Console.ReadKey();
+        }
+    }
+}
+```
+
+### Method overriding
+In C#, for overriding the base class method in a derived class, you have to declare a base class method as virtual and derived class method asoverride shown below:
+
+```cs
+using System;
+namespace Polymorphism
+{
+    class A
+    {
+        public virtual void Test() { Console.WriteLine("A::Test()"); }
+    }
+
+    class B : A
+    {
+        public override void Test() { Console.WriteLine("B::Test()"); }
+    }
+
+    class C : B
+    {
+        public override void Test() { Console.WriteLine("C::Test()"); }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            A a = new A();
+            B b = new B();
+            C c = new C();
+            a.Test(); // output --> "A::Test()"
+            b.Test(); // output --> "B::Test()"
+            c.Test(); // output --> "C::Test()"
+
+            a = new B();
+            a.Test(); // output --> "B::Test()"
+
+            b = new C();
+            b.Test(); // output --> "C::Test()"
+
+            Console.ReadKey();
+        }
+    }
+}
+```
+
+### Method overloading
+You can also mix the method hiding and method overriding by using virtual and new keyword since the method of a derived class can be virtual and new at the same time. This is required when you want to further override the derived class method into next level as I am overriding Class B, Test() method in Class C as shown below:
+
+```cs
+using System;
+namespace Polymorphism
+{
+    class A
+    {
+        public void Test() { Console.WriteLine("A::Test()"); }
+    }
+
+    class B : A
+    {
+        public new virtual void Test() { Console.WriteLine("B::Test()"); }
+    }
+
+    class C : B
+    {
+        public override void Test() { Console.WriteLine("C::Test()"); }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            A a = new A();
+            B b = new B();
+            C c = new C();
+
+            a.Test(); // output --> "A::Test()"
+            b.Test(); // output --> "B::Test()"
+            c.Test(); // output --> "C::Test()"
+
+            a = new B();
+            a.Test(); // output --> "A::Test()"
+
+            b = new C();
+            b.Test(); // output --> "C::Test()"
+
+            Console.ReadKey();
+        }
+    }
+}
+```
 
 ## Access Modifiers
 
