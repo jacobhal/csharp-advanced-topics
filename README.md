@@ -289,57 +289,29 @@ An alternative to delegates is using interfaces, how do we decide which to use?
 Below are two code examples, one using interfaces and one using delegates:
 
 ```cs
-public interface ICustomerFilter 
-{
-    bool Filter (Customer customer); 
-}
-
-public class Util 
-{
-    public static List<Customer> FilterCustomers (List<Customer> allCustomers, ICustomerFilter customerFilter) 
-    {
-        List<Customer> filteredCustomers = new List<Customer>();
-        for(int i = 0; i < allCustomers.Length; i++)
-        {
-            if(customerFilter(allCustomers[i])) filteredCustomers.add(allCustomers[i]);
-        }
-        return filteredCustomers;
-    } 
-}
-
-class CustomersWithFirstAndLastNames: ICustomerFilter 
-{
-    public bool Filter (Customer customer) => String.IsNullOrWhiteSpace(customers?.firstName) && String.IsNullOrWhiteSpace(customers?.lastName) 
-}
-
-class CustomersWhoLikeStarks: ICustomerFilter
-{
-    public bool Filter (Customer customer) => customer?.gameOfThronesHouse == "Starks";
-}
+interface IMyInterface    
+{    
+    int MySum(int a, int b);    
+}    
+  
+public class MyClassTest : IMyInterface    
+{    
+    public int MySum(int a, int b)    
+    {    
+        return a + b;    
+    }    
+}    
 ```
 
 ```cs
-public delegate bool ICustomerFilter(Customer customer);
-
-public class Util 
-{
-    public static List<Customer> FilterCustomers (List<Customer> allCustomers, ICustomerFilter customerFilter) 
-    {
-        List<Customer> filteredCustomers = new List<Customer>();
-        for(int i=0; i<allCustomers.Length; i++)
-        {
-            if(customerFilter(allCustomers[i])) filteredCustomers.add(allCustomers[i]);
-        }
-        return filteredCustomers;
-    } 
-}
-
-static bool CustomersWithFirstAndLastNames(Customer customers) => 
-    String.IsNullOrWhiteSpace(customers?.firstName) &&
-    String.IsNullOrWhiteSpace(customers?.lastName);
-
-static bool CustomersWhoLikeStarks(Customer customers) => 
-    customers?.gameOfThronesHouse == "Starks";
+public delegate int MyDelegate(int a, int b);    
+public class MyClass    
+{    
+    public static int Addition(int a, int b)    
+    {    
+        return a + b;    
+    }    
+}    
 ```
 
 Comparing usage:
@@ -348,40 +320,59 @@ Comparing usage:
 static void Main() 
 {
     // Interface:
-    List<Customer> customers = new List<Customer>();
-    Util.PopulateCustomers(out customers);
-    var myFilteredCustomers = Util.Filter(customers, new CustomersWithFirstAndLastNames());
+    IMyInterface myClassTest = new MyClassTest();    
+    Console.WriteLine(myClassTest.MySum(10, 20));    
     
     // Delegates:
-    List<Customer> customers2 = new List<Customer>();
-    Util.PopulateCustomers(out customers2);
-    var myFilteredCustomers = Util.Filter(customers2, CustomersWithFirstAndLastNames);
+    MyDelegate myDelegate = MyClass.Addition;    
+    Console.WriteLine(myDelegate(10, 20));    
 }
 ```
 
-The difference is subtle, but for this scenario, the delegate enables cleaner design. Technically, a delegate is a little bit overkill for this usecase as we could achieve the above with LINQ, but it does provide a clear comparison against interfaces.
-
-Let’s say that now we needed to combine multiple filters so we would get customers who have CustomersWithFirstAndLastNames and CustomersWhoLikeHouseStark. Here is how we would implement it with an interface and a delegate:
+So, Delegate made it smaller. But, it can be written in more optimized and smaller way like the following: 
 
 ```cs
-static void Main() 
-{
-    // Interface:
-    ...
-    var myFilteredCustomers = Util.Filter(
-          Util.Filter(customers, new CustomersWithFirstAndLastNames()),
-               new CustomersWhoLikeHouseStark())
-          );
-
-    // Delegates:
-    ...
-    ICustomerFilter manyFilters = CustomersWithFirstAndLastNames;
-    manyFilters += CustomersWhoLikeHouseStark;
-    var myFilteredCustomers = Util.Filter(customers2, manyFilters);
-}
+static void Main(string[] args)    
+{    
+    Func<int, int, int> operation = (a, b) => a + b;    
+    Console.WriteLine(operation(10, 20));    
+    Console.ReadKey();    
+}   
 ```
 
-For the interface example, it is obvious that we could potentially end up with a heavily nested filter, which is not ideal. We could have instead executed Util.Filter(...) on multiple lines and reassigned the result to the list, but this is not as succinct or flexible as the multicast delegate. Do note, in the delegate example, we could also remove the filter by applying -=.
+There are so many differences between Delegate and Event. But, I will explain one practical difference between them.
+
+The main difference is that different delegate instances can be provided for the same delegate from the same class. But, it did not happen with Interface.
+
+We can see this by looking at the following example comparison:
+
+```cs
+public delegate int MyDelegate(int a, int b);    
+public class MyClassResult    
+{    
+    //Below All methods can be used to implement the MyDelegate Delegate.    
+    void M1(int MyDelegate) { }    
+    void M2(int MyDelegate) { }    
+    void M3(int MyDelegate) { }    
+    void M4(int MyDelegate) { }    
+}   
+```
+
+```cs
+interface IMyInterfaceExample    
+{    
+    void MyResult(int a, int b);    
+}    
+   
+public class MyClassExample : IMyInterfaceExample    
+{    
+    public void MyResult(int a, int b)    
+    {    
+        // Only this method can be used to call an implementation through an interface    
+    }    
+}  
+```
+
 
 ## Lambda Expressions
 
@@ -580,6 +571,9 @@ public static IEnumerable func(int start, int number) {
 }
 
 ```
+
+## The out keyword
+
 
 ## Value types vs Reference types
 In C#, these two data types are categorized based on how they store their value in the memory.
