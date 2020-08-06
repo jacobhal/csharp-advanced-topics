@@ -375,8 +375,153 @@ public class MyClassExample : IMyInterfaceExample
 
 
 ## Lambda Expressions
+Lambda expressions exist in most lanuages these days. These are anonymous methods with the following attributes:
+
+* No access modifier
+* No name
+* No return statement
 
 ## Events
+A definition of events:  
+* A mechanism for communication between objects. This means that when something happens inside an object it can notify other objects about it.
+* Used in building *Loosely Coupled Applications*. This means that the classes or components are not tightly coupled together. A loosely coupled application is easy to extend without breaking or changing one or more of its existing capabilities.
+* Helps extending applications.
+
+If we look at the code example below, we add an extra line in order to also allow the Encode method to send a text message after encoding is complete. However, this means that VideoEncoder and all classes that depend on it have to be recompliled which is a bad thing. Events can help is solve this problem.
+
+```cs
+public class VideoEncoder {
+    public void Encode(Video video) {
+        // Encoding logic...
+
+        _mailService.Send(new Mail());
+
+        // If we add the following line to also send a text message after encoding, the whole class/method and all classes that depend on the VideoEncoder have to be recompiled.
+        _messageService.Send(new Text());
+    }
+}
+```
+
+Events are basically a way to implement the Publish-Subscribe or Pub-Sub pattern where components or classes subscribe to a publisher. In our example above, the VideoEncoder could be the publisher/event sender while the MailService would be the subscriber/event receiver. VideoEncoder does not need to know anything about the MailService in order for this to work.
+
+Below is a very simple code example illustrating the use of Events:
+
+```cs
+public class VideoEncoder {
+    public void Encode(Video video) {
+        // Encoding logic...
+
+        OnVideoEncoded(); // Notify the subscribers that encoding has occurred.
+    }
+}
+
+public class MailService {
+    // A method implemented by the subscriber, an "Event Handler"
+    public void OnVideoEncoded(object source, EventArgs e) {
+         
+    }
+}
+```
+
+> Note: The Subscriber implements the *Event Handler* in the example above. The signature of this method is decided by a delegate in the Publisher.
+
+**Delegate definition for Pub-Sub**  
+* Agreement/contract between Publisher and Subscriber.
+* Determines the signature of the event handler method in the Subscriber.
+
+**Steps to follow in order to setup Publish-Subscribe**  
+1. Define a delegate (the contract between the Publisher and Subscriber)
+2. Define an event based on the delegate
+3. Raise or publish the event
+
+Below is a code example of a basic setup (note that there are almost duplicates of some lines in order to show how to pass data about the event that happened):  
+
+```cs
+public class Video {
+    public string Title { get; set; }
+}
+
+public class VideoEventArgs : EventArgs {
+    public Video Video { get; set; }
+}
+
+public class VideoEncoder {
+    // The first parameter is always an object in C#.
+    // EventArgs is typically any additional data that we want to send with the event.
+    // The naming convention of the function is typically the name of the event followed by "EventHandler".
+    public delegate void VideoEncodedEventHandler(object source, EventArgs args); // Without arguments
+
+    public delegate void VideoEncodedEventHandler(object source, VideoEventArgs args); // With arguments
+
+    public event VideoEncodedEventHandler VideoEncoded;
+
+    public void Encode(Video video) {
+        Console.WriteLine("Encoding video...");
+        Thread.Sleep(3000); // Simulate video encoding
+
+        OnVideoEncoded(video);
+    }
+
+    // Event Publisher methods should be protected, virtual and return void.
+    // The naming convention is the word "On" followed by the name of the event.
+    protected virtual void OnVideoEncoded(Video video) {
+        // If there are any subscribers check
+        if (VideoEncoded != null) {
+            // The current class, "this" is publishing the event.
+            // We pass EventArgs.Empty to not pass any data along.
+            VideoEncoded(this, EventArgs.Empty); // Without arguments
+
+            VideoEncoded(this, new VideoEventArgs() { Video = video }); // With arguments
+        }
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        var video = new Video() { Title = "Video 1" };
+        var videoEncoder = new VideoEncoder(); // Publisher
+        var mailService = new MailService(); // Subscriber
+        var messageService = new MessageService(); // Subscriber
+
+        videoEncoder.VideoEncoded += mailService.OnVideoEncoded; // Setup event handler
+        videoEncoder.VideoEncoded += messageService.OnVideoEncoded; // Setup another event handler
+
+        videoEncoder.Encode(video);
+    }
+}
+
+public class MailService {
+    // Without arguments
+    public void OnVideoEncoded(object source, EventArgs e) {
+        Console.WriteLine("MailService: Sending an email...");
+    }
+
+    // With arguments
+    public void OnVideoEncoded(object source, VideoEventArgs e) {
+        Console.WriteLine("MailService: Sending an email..." + e.Video.Title);
+    }
+}
+
+public class MessageService {
+    // Without arguments
+    public void OnVideoEncoded(object source, EventArgs e) {
+        Console.WriteLine("MessageService: Sending a text message...");
+    }
+
+    // With arguments
+    public void OnVideoEncoded(object source, VideoEventArgs e) {
+        Console.WriteLine("MessageService: Sending a text message..." + e.Video.Title);
+    }
+}
+```
+
+There is an even simpler way to do this with predefined .NET delegate types. There are two different types:  
+* EventHandler (without arguments)
+* EventHandler<TEventArgs> (with arguments)
+
+These types are basically always used instead of defining your own delegate when using events.
+
+> Replace `public event VideoEncodedEventHandler VideoEncoded;` with `public event EventHandler<VideoEventArgs> VideoEncoded` and remove the delegate declaration in order to use the C# predefined EventHandler delegate.
 
 ## Extension Methods
 
