@@ -350,7 +350,7 @@ We can see this by looking at the following example comparison:
 public delegate int MyDelegate(int a, int b);    
 public class MyClassResult    
 {    
-    //Below All methods can be used to implement the MyDelegate Delegate.    
+    // Below All methods can be used to implement the MyDelegate Delegate.    
     void M1(int MyDelegate) { }    
     void M2(int MyDelegate) { }    
     void M3(int MyDelegate) { }    
@@ -375,6 +375,67 @@ public class MyClassExample : IMyInterfaceExample
 
 
 ## Lambda Expressions
+Lambda expressions or anonymous functions are used in almost every programming language these days.  
+Essentially, a lambda expression can be defined like this:  
+
+An anonymous method that:  
+* Has no access modifier (public, private etc.)
+* Has no name
+* Has no return statement
+
+Lambda functions are used for convenience and readability. Below is a comparison between a normal function and a lambda function:  
+
+```cs
+static void Main(string[] args) {
+    int number = 5;
+
+    // Lambda functions using delegates (format: args => expression)
+    // No argument lambda function: () => ...
+    // One argument lambda function: x => ...
+    // Multiple argument lambda function: (x, y) => ...
+    Func<int, int> square = n => number*number;
+    Console.WriteLine(square(number));
+
+    // Normal function
+    number = 5;
+    Console.WriteLine(Square(number));
+}
+
+static int Square(int number) {
+    return number*number;
+}
+```
+
+Below is a lambda expression code example for filtering books. This kind of filtering by using a Predicate delegate as argument is extremely common:    
+
+```cs
+class Book {
+    public string Title { get; set; }
+    public int Price { get; set; }
+}
+
+class BookRepository {
+    public List<Book> GetBooks() {
+        return new List<Book> {
+            new Book() {Title = "Title 1", Price = 5},
+            new Book() {Title = "Title 2", Price = 7},
+            new Book() {Title = "Title 3", Price = 17}
+        };
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        var books = new BookRepository().GetBooks();
+
+        var cheapBooks = books.FindAll(b => b.Price < 10);
+
+        foreach(var book in cheapBooks) {
+            Console.WriteLine(book);
+        }
+    }
+}
+```
 
 ## Events
 
