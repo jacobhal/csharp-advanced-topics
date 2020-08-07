@@ -737,8 +737,45 @@ static void Main(string[] args) {
 }
 ```
 
-
 ## Nullable Types
+Nullable types exist in order to make it possible to have optional values that are allowed to be null. In Swift this would be called an Optional and declared in the following way: `let number: Int? = nil`. The questionmark specifies that it is an Optional.
+
+**Value types**
+* Cannot be null
+* bool hasAccess = true; // or false
+
+```cs
+static void Main(string[] args) {
+    Nullable<DateTime> date = null; // DateTime is a value type and needs a Nullable wrapper in order to be null
+    DateTime? date = null; // Shorthand version (very common syntax in most languages)
+
+    // Get the value or the default
+    date.GetValueOrDefault();
+
+    // Does the Nullable have a value or not?
+    date.HasValue;
+
+    // The value of the object. Throws an exception if no value is present. For a Nullable you should use GetValueOrDefault()
+    date.Value;
+
+    // Assign nullable to non-nullabe
+    DateTime? date = new DateTime(2014, 1, 1);
+    DateTime date2 = date; // Compilation error
+    DateTime date2 = date.GetValueOrDefault(); // Works
+
+    // Null Coalescing Operator
+    DateTime? nullDate = null;
+    date2 = nullDate ?? DateTime.Today; // Get the value if not null, otherwise use today's time and date
+
+    // Tertiary Operator
+    date2 = (date != null) ? nullDate.GetValueOrDefault() : DateTime.Today; // longer version of null coalescion
+
+    // Null Conditional Operator
+    // Evaluate the first operand; if that's null, stop, with a result of null. Otherwise, evaluate the second operand (as a member access of the first operand).
+    string str = null;
+    var tmp = str?.ToString(); // Assign null to tmp since str is null, do not attempt to call ToString()
+}
+```
 
 ## Dynamic
 
