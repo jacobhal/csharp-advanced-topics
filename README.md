@@ -813,8 +813,133 @@ public static IEnumerable func(int start, int number) {
 
 ```
 
-## The out keyword
+## The ref keyword
+The ref keyword in C# is used for passing or returning references of values to or from Methods. Basically, it means that any change made to a value that is passed by reference will reflect this change since you are modifying the value at the address and not just the value. It can be implemented in the following cases:
 
+* To pass an argument to a method by its reference.
+* To define a method signature to return a reference of the variable.
+* To declare a struct as a ref struct
+* As local reference
+
+```cs
+// Main Method 
+static void Main(string[] args) 
+{ 
+  
+    // Initialize a and b 
+    int a = 10, b = 12; 
+
+    // Display initial values 
+    Console.WriteLine("Initial value of a is {0}", a); 
+    Console.WriteLine("Initial value of b is {0}", b); 
+    Console.WriteLine(); 
+
+    // Call addValue method by value 
+    addValue(a); 
+
+    // Display modified value of a 
+    Console.WriteLine("Value of a after addition"+ 
+                            " operation is {0}", a); 
+
+    // Call subtractValue method by ref 
+    subtractValue(ref b); 
+
+    // Display modified value of b 
+    Console.WriteLine("Value of b after "+ 
+        "subtration operation is {0}", b); 
+} 
+
+// Define addValue 
+// Parameters passed by value 
+public static void addValue(int a) 
+{ 
+    a += 10; 
+} 
+
+// Define subtractValue 
+// Parameters passed by ref 
+public static void subtractValue(ref int b) 
+{ 
+    b -= 5; 
+} 
+```
+
+Output:  
+```
+Initial value of a is 10  
+Initial value of b is 12  
+
+Value of a after addition operation is 10  
+Value of b after subtration operation is 7  
+```
+
+## The in keyword
+The in keyword causes arguments to be passed by reference. It makes the formal parameter an alias for the argument, which must be a variable. In other words, any operation on the parameter is made on the argument. It is like the ref or out keywords, except that in arguments cannot be modified by the called method. Whereas ref arguments may be modified, out arguments must be modified by the called method, and those modifications are observable in the calling context.
+
+Generally speaking, there is only one use case where in can be helpful: high performance apps dealing with lots of large readonly structs.
+
+```cs
+int readonlyArgument = 44;
+InArgExample(readonlyArgument);
+Console.WriteLine(readonlyArgument);     // value is still 44
+
+void InArgExample(in int number)
+{
+    // Uncomment the following line to see error CS8331
+    //number = 19;
+}
+```
+
+## The out keyword
+You can use the out keyword in two contexts:
+
+* As a parameter modifier, which lets you pass an argument to a method by reference rather than by value.
+* In generic type parameter declarations for interfaces and delegates, which specifies that a type parameter is covariant.
+
+### Parameter modifier
+The out keyword causes arguments to be passed by reference. It makes the formal parameter an alias for the argument, which must be a variable. In other words, any operation on the parameter is made on the argument. It is like the ref keyword, except that ref requires that the variable be initialized before it is passed. It is also like the in keyword, except that in does not allow the called method to modify the argument value. To use an out parameter, both the method definition and the calling method must explicitly use the out keyword. For example:
+
+```cs
+int initializeInMethod;
+OutArgExample(out initializeInMethod);
+Console.WriteLine(initializeInMethod); // value is now 44
+
+void OutArgExample(out int number)
+{
+    number = 44;
+}
+```
+
+## Generic type declarations
+For generic type parameters, the out keyword specifies that the type parameter is covariant. You can use the out keyword in generic interfaces and delegates.
+
+Covariance enables you to use a more derived type than that specified by the generic parameter. This allows for implicit conversion of classes that implement covariant interfaces and implicit conversion of delegate types. Covariance and contravariance are supported for reference types, but they are not supported for value types.
+
+An interface that has a covariant type parameter enables its methods to return more derived types than those specified by the type parameter. For example, because in .NET Framework 4, in IEnumerable<T>, type T is covariant, you can assign an object of the IEnumerable(Of String) type to an object of the IEnumerable(Of Object) type without using any special conversion methods.
+
+```cs
+// Covariant interface.
+interface ICovariant<out R> { }
+
+// Extending covariant interface.
+interface IExtCovariant<out R> : ICovariant<R> { }
+
+// Implementing covariant interface.
+class Sample<R> : ICovariant<R> { }
+
+class Program
+{
+    static void Test()
+    {
+        ICovariant<Object> iobj = new Sample<Object>();
+        ICovariant<String> istr = new Sample<String>();
+
+        // You can assign istr to iobj because
+        // the ICovariant interface is covariant.
+        iobj = istr;
+    }
+}
+```
 
 ## Value types vs Reference types
 In C#, these two data types are categorized based on how they store their value in the memory.
