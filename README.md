@@ -630,6 +630,114 @@ You can query
 * XML (LINQ to XML)
 * ADO.NET Data Sets (LINQ to Data Sets)
 
+Below is a code example that filters a list of books and compares the usual foreach approach to the LINQ approach:
+
+```cs
+class Book {
+    public string Title { get; set; }
+    public float Price { get; set; }
+}
+
+class BookRepository {
+    public IEnumerable<Book> GetBooks() {
+        return new List<Book> {
+            new Book() { Title = "Book 1", Price = 5 },
+            new Book() { Title = "Book 2", Price = 9.99f },
+            new Book() { Title = "Book 3", Price = 12 },
+            new Book() { Title = "Book 4", Price = 7 },
+            new Book() { Title = "Book 5", Price = 9 }
+        };
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        var books = new BookRepository().GetBooks();
+
+        // Without LINQ
+        var cheapBooks = new List<Book>();
+        foreach (var book in books) {
+            if (book.Price < 10) cheapBooks.Add(book);
+        }
+
+        // With LINQ
+        cheapBooks = books.Where(b => b.Price < 10);
+
+        foreach (var book in cheapBooks) {
+            Console.WriteLine(book.Title + " " + book.Price);
+        }
+    }
+}
+```
+
+Below are a few examples or basic LINQ usage and a comparison between LINQ Extension Methods and LINQ Query Operators:  
+
+```cs 
+static void Main(string[] args) {
+
+    // LINQ Extension Methods
+
+    // Sorting
+    books.OrderBy(b => b.Title);
+
+    // Method chaining
+    books
+        .Where(b => b.Price < 10)
+        .OrderBy(b => b.Title);
+
+    // Select is used for projection or transformation (do something for each book or select some property)
+    books
+        .Where(b => b.Price < 10)
+        .OrderBy(b => b.Title)
+        .Select(b => b.Title);
+
+    // LINQ Query Operators
+    var cheaperBooks = from b in books
+                       where b.Price < 10
+                       orderby b.Title
+                       select b.Title;
+}
+```
+
+> Note: The LINQ query operator for selecting all book titles with price less than 10 is equal to the same query using LINQ extension methods. A LINQ query operator always start with "from" and end with "select".
+
+Below are some great ways to make use of LINQ:
+
+```cs
+static void Main(string[] args) {
+    // Get a single instance from the book list (crashes if no matching elements are found)
+    books.Single(b => b.Title == "Book 1")
+
+    // Get a single instance from the book list but return null if no elements are found
+    books.SingleOrDefault(b => b.Title == "Book that does not exist")
+
+    // Get the first instance with the given title
+    books.First(b => b.Title == "Book 3");
+    books.FirstOrDefault(b => b.Title == "Book 3");
+
+    // Get the last instance with the given title
+    books.Last(b => b.Title == "Book 3");
+    books.LastOrDefault(b => b.Title == "Book 3");
+
+    // Skip the first 2 objects and return the next 3
+    books.Skip(2).Take(3);
+
+    // Count the number of books
+    books.Count();
+
+    // Return the most/least expensive book
+    books.Max(b => b.Price);
+    books.Min(b => b.Price);
+
+    // Sum all prices together
+    books.Sum(b => b.Price);
+
+    // Get the average of the prices
+    books.Average(b => b.Price);
+}
+```
+
+
 ## Nullable Types
 
 ## Dynamic
