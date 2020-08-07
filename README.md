@@ -622,6 +622,13 @@ Only create extension methods when you have to. Usually you will use extension m
 
 
 ## LINQ
+LINQ is one of the most well known features of C#. LINQ stands for Language Integrated Query and gives you the capability to query objects.
+
+You can query
+* Objects in memory, e.g. collections (LINQ to Objects)
+* Databases (LINQ to Entities)
+* XML (LINQ to XML)
+* ADO.NET Data Sets (LINQ to Data Sets)
 
 ## Nullable Types
 
