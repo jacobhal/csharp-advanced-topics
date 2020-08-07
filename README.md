@@ -777,7 +777,63 @@ static void Main(string[] args) {
 }
 ```
 
-## Dynamic
+## Dynamics
+Dynamics is one of the features in C# that confuse a lot of developers. In reality, it is quite simple.
+There are two types of programming languages:  
+* Statically-typed languages: C#, Java
+* Dynamically-typed languages: Ruby, Javascript, Python
+
+> In static languages, type resolution (resolution of types, properties, members, methods) happens at compile-time.
+
+> In dynamic languages, type resolution (resolution of types, properties, members, methods) happens at run-time.
+
+**Benefits**
+* Static languages: early feedback (compile-time)
+* Dynamic languages: easier and faster to code
+
+### Reflection
+Reflection provides objects (of type Type) that describe assemblies, modules, and types. You can use reflection to dynamically create an instance of a type, bind the type to an existing object, or get the type from an existing object and invoke its methods or access its fields and properties. If you are using attributes in your code, reflection enables you to access them. For more information, see Attributes.
+
+Reflection allows you to get access to methods/properties based on strings. It is not very beautiful but can be useful in some cases.
+
+```cs
+static void Main(string[] args) {
+    object obj = "Jacob";
+    obj.GetHashCode();
+
+    // Invoke the GetHashCode method using reflection
+    var methodInfo = obj.GetType().GetMethod("GetHashCode");
+    methodInfo.Invoke(null, null);
+}
+```
+
+### Making use of Dynamics
+Dynamics allow us to declare variables as dynamically typed. If we know that the object in the code example below has an Optimize method at run-time we can set it as a dynamic in order to get around the statically typed restrictions.
+
+```cs
+static void Main(string[] args) {
+    dynamic obj = "Jacob";
+    obj.Optimize(); // No compile-time error
+}
+```
+
+> CLR (Common Language Runtime) is the .NET virtual machine that gets your compiled code and converts it into machine code at runtime. In .NET Framework 4 they added the DLR (Dynamic Language Runtime) which sits on top of CLR and gives dynamic capabilities to .NET.
+
+Below are a few basic code examples that shows the attributes of dynamics:
+```cs
+static void Main(string[] args) {
+    dynamic name = "Jacob";
+    name = 10; // Works
+
+    dynamic a = 10;
+    dynamic b = 5;
+    var c = a + b; // var becomes dynamic
+
+    int i = 5;
+    dynamic d = i; // Implicit type conversion
+    long l = d; // No need to cast since an int can be placed into a long
+}
+```
 
 ## Exception Handling
 
