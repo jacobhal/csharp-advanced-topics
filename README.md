@@ -580,6 +580,46 @@ These types are basically always used instead of defining your own delegate when
 > Replace `public event VideoEncodedEventHandler VideoEncoded;` with `public event EventHandler<VideoEventArgs> VideoEncoded` and remove the delegate declaration in order to use the C# predefined EventHandler delegate.
 
 ## Extension Methods
+The definition of extension methods:  
+They allow us to add methods to an existing class without
+* changing its source code
+* creating a new class that inherits from it
+
+Below is a code example:  
+
+```cs
+class Program {
+    static void Main(string[] args) {
+        string post = "This is supposed to be a very long post blah blah blah...";
+        var shortenedPost = post.Shorten(5);
+    }
+}
+
+namespace System {
+    // A static class  is necessary to add extension methods to an existing class
+    // The naming convention of the class you are extending followed by "Extensions" is a good practice
+    public static class StringExtensions {
+        // First parameter will always have the "this" keyword followed by the type you are extending
+        public static string Shorten(this String str, int numberOfWords) {
+            if (numberOfWords < 0)
+                throw new ArgumentOutOfRangeException("numberOfWords should be greater or equal to 0.");
+            if (numberOfWords == 0) return "";
+
+            var words = str.Split(' ');
+
+            if (words.Length <= numberOfWords) return str;
+
+            return string.Join(" ", words.Take(numberOfWords)) + "...";
+        }
+    }
+}
+```
+
+> In the example above we extend the String class with a Shorten Method. Note that the namespace of our StringExtensions class is System, thus whenever we import System in order to access String we also get our extension methods.
+
+Only create extension methods when you have to. Usually you will use extension methods rather than create them yourself. An example of this is the IEnumerable interface. This interface has lots of extension methods that were added with the introduction of LINQ. See the next chapter for an in depth look at LINQ. 
+
+
 
 ## LINQ
 
