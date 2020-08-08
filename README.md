@@ -5,6 +5,7 @@ Table of Contents
 
    * [C# Advanced Topics](#c-advanced-topics)
    * [Table of Contents](#table-of-contents)
+      * [Certificate](#certificate)
       * [Generics](#generics)
          * [Different type of constraints](#different-type-of-constraints)
          * [IEnumerable vs ICollection vs IList](#ienumerable-vs-icollection-vs-ilist)
@@ -44,6 +45,9 @@ Table of Contents
          * [Reference type](#reference-type)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+
+## Certificate
+![Image not found](https://github.com/jacobhal/csharp-advanced-topics/blob/master/CERTIFICATE.jpg)
 
 ## Generics
 Generics were added to C# quite early in order to make it possible to reuse the same classes in multiple places. For instance, instead of having to create a class called BookList, CarList etc. for every specific type of list that we want, we can now use a generic type of list.
