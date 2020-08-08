@@ -941,6 +941,56 @@ public class YouTubeApi
 > Note: in the real world when using something like Entity Framework for accessing databases you will see rather generic exceptions and then you can keep looking at the Inner Exceptions to see the actual reason to why the exception occurred.
 
 ## Asynchronous Programming with Async/Await
+**Synchronous programming**
+* Program is executed line by line, one at a time
+* When a function is called, program execution has to wait until the function returns
+
+**Asynchronous programming**
+* When a function is called, program execution continues to the next line *WITHOUT* waiting for the function to complete
+
+**Attributes of asynchronous programming**
+* Improves responsiveness (think about Windows Media Player, when you press play the UI continues to be responsive. You can do things like resize the window, move it around, see an animation.)
+* Used when accessing the Web, when working with files and databases, working with images etc.
+* How to use it? Traditionally in C#: Multi-threading, callbacks. New in .NET 4.5: Async/Await
+
+Below is a small code example for a WPF (Windows Presentation Foundation) application code snippet to illustrate how to use async:
+
+```cs
+// We need to return a Task object which encapsulates the state of an asynchronous operation
+// It is good convention to add the Async suffix to the name of the method 
+public async Task DownloadHtmlAsync(string url) {
+    var webClient = new WebClient();
+
+    // await is a marker for the compiler which lets it know that this operation might take some time so we can move on with other things
+    var html = await webClient.DownLoadStringTaskAsync(url); 
+
+    using(var streamWriter = new StreamWriter(@"C:\result.html")) {
+        await streamWriter.WriteAsync(html);
+    }
+}
+
+public async Task<string> GetHtmlAsync(string url) {
+    var webClient = new WebClient();
+
+    return await webClient.DownloadStringTaskAsync(url);
+}
+
+private async void CallAsyncMethods() {
+    DownloadHtmlAsync("http://msdn.microsoft.com");
+
+    // Direct await
+    var html = await GetHtmlAsync("http://msdn.microsoft.com");
+
+    // Assign task and await later
+    var getHtmlTask = GetHtmlAsync("http://msdn.microsoft.com");
+    MessageBox.Show("Waiting for task to finish"); // Do some work that is not dependent on the completion of the task
+    html = await getHtmlTask;
+}
+```
+
+We use await in the example above to let the compiler know that we do not want execution to be blocked and that it can come back later when the await method call is done to continue execution. The await keyword can only be used in async methods.
+
+> Note: We use the non-generic version Task when our method returns void and the generic method Task<T> when we need to return something from the method.
 
 ## Polymorphism
 Polymorphism is one one of the main aspect of OOPS Principles which include method overriding and method overloading. Virtual and Override keyword are used for method overriding and new keyword is used for method hiding.
