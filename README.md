@@ -1,4 +1,5 @@
 # C\# Advanced Topics
+A Git Udemy course. Go through the table of contents and select whatever you want to know more about.
 
 Table of Contents
 =================
