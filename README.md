@@ -833,9 +833,112 @@ static void Main(string[] args) {
     dynamic d = i; // Implicit type conversion
     long l = d; // No need to cast since an int can be placed into a long
 }
-```
+``` 
 
 ## Exception Handling
+We need exception handling in order to deal with unexpected events or crashes of our applications. If we do not handle exceptions, the application will crash with an exception and we get a stack trace that specifies the sequence of method calls in reversed order.
+
+We use try/catch blocks in order to deal with exceptions:  
+
+```cs
+class Calculator {
+    public int Divide(int numerator, int denomerator) {
+        return numerator/denomerator;
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        var calculator = new Calculator();
+        try {
+            var result = calculator.Divide(5, 0); // 0 does not work as a denominator, System.DivideByZeroException
+        } catch(Exception e) {
+            // In the catch block we can either rethrow the error to the caller of the code or deal with it in order to continue execution
+            Console.WriteLine("An unexpected error occurred.");
+        }
+    }
+}
+```
+
+The properties of an exception:  
+* Message: The message connected to the specific exception
+* Source: The assembly or dll that the exception originated from
+* Stack Trace: The reverse sequence of method calls that lead to the exception
+* Target Site: The location where the exception happened
+* Inner Exception: An exception that could be inside the exception
+* Data: Sometimes an exception can contain some more data about the exception
+
+Remember to call the Dispose method in a finally block if you are dealing with unmanaged resources. The finally block is ALWAYS executed. This is to make sure that you are not keeping files open or network connections open etc. and eventually run out of resources. Look at the example below:  
+
+```cs
+static void Main(string[] args) {
+    StreamReader streamReader = null;
+    try {
+        streamReader = new StreamReader(@"C:\file.zip");
+        var content = streamReader.ReadToEnd();
+    } catch(Exception e) {
+        Console.WriteLine("An unexpected error occurred.");
+    } finally { // Finally block is ALWAYS executed
+        // If we have classes that use unmanaged resources such as database connections, network connections, file handlers etc.that are not handled by the garbage collector automatically we need to implement the IDisposible interface.
+        if (streamReader != null)
+            streamReader.Dispose(); // If something goes wrong when reading we make sure to close the stream
+    }
+}
+```
+
+If we want to clean up the code above we can use the "using" keyword which creates a finally block internally and call the Dispose method for us:
+
+```cs
+static void Main(string[] args) {
+    try {
+        using (var streamReader = new StreamReader(@"C:\file.zip")) {
+            var content = streamReader.ReadToEnd();
+        }
+    } catch(Exception e) {
+        Console.WriteLine("An unexpected error occurred.");
+    }
+}
+```
+
+### Creating Custom Exceptions
+Sometimes we want to create custom exceptions in order to not expose lots of different low level exceptions to the higher level of our application.
+
+In the following example, if we get a YouTubeException maybe we want to return a default list of videos instead. Look at the example code below:
+
+```cs
+public class YouTubeException : Exception
+{
+    public YouTubeException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
+}
+
+public class YouTubeApi
+{
+    public List<Video> GetVideos(string user)
+    {
+        try
+        {
+            // Access YouTube web service 
+            // Read the data 
+            // Create a list of Video objects
+            throw new Exception("Oops some low level YouTube error.");
+        }
+        catch (Exception ex)
+        {
+            // Log exception
+
+            // Catch all low level exceptions, log them and wrap them all in a YoutubeException. 
+            throw new YouTubeException("Could not fetch the videos from YouTube.", ex); // wrap the actual exception in our YouTubeException
+        }
+
+        return new List<Video>();
+    }
+}
+```
+
+> Note: in the real world when using something like Entity Framework for accessing databases you will see rather generic exceptions and then you can keep looking at the Inner Exceptions to see the actual reason to why the exception occurred.
 
 ## Asynchronous Programming with Async/Await
 
