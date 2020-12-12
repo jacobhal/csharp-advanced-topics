@@ -1005,6 +1005,12 @@ We use await in the example above to let the compiler know that we do not want e
 
 > Note: We use the non-generic version Task when our method returns void and the generic method Task<T> when we need to return something from the method.
 
+### Task.Run
+TODO
+
+### ConfigureAwait
+TODO
+
 ## Polymorphism
 Polymorphism is one one of the main aspect of OOPS Principles which include method overriding and method overloading. Virtual and Override keyword are used for method overriding and new keyword is used for method hiding.
 
